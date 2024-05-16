@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'ray-tracer/scene'
+
+def main
+  scene = Scene.new './scenes/simple.yml'
+
+  render_scene scene
+end
+
+def render_scene(scene)
+  w = scene.width
+  h = scene.height
+  s = scene.spp
+
+  puts "P3\n#{w} #{h}\n255\n"
+
+  scene.pixels do |pixel|
+    print_color(pixel, s)
+  end
+end
+
+def print_color(pixel, spp)
+  scale = 1.0 / spp
+
+  puts("#{real_to_8bit(pixel.x, scale)} \
+#{real_to_8bit(pixel.y, scale)} \
+#{real_to_8bit(pixel.z, scale)}")
+end
+
+def real_to_8bit(real, scale)
+  Integer(256 * clamp(Math.sqrt(real * scale), 0, 1))
+end
+
+def clamp(value, min, max)
+  if min <= value || value <= max
+    value
+  elsif value < min
+    min
+  else
+    max
+  end
+end
+
+main
